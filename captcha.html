@@ -1,0 +1,25 @@
+<html>
+<head>
+	<title>Captcha Harvester</title>
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+	<form action="/submit" method="POST">
+		<div class="g-recaptcha" id="captchaFrame" data-sitekey="6LeoeSkTAAAAAA9rkZs5oS82l69OEYjKRZAiKdaF" data-callback="sub"></div>
+	</form>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+	<script>
+
+		const remote = require('electron').remote
+  		const app = remote.app
+  		const ipcRenderer = require('electron').ipcRenderer
+
+		function sub() {
+			ipcRenderer.send('sendCaptcha', grecaptcha.getResponse());
+			grecaptcha.reset();
+		}
+	</script>
+</body>
+</html>
