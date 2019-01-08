@@ -1,4 +1,4 @@
-# Captcha-Harvester
+# Captcha-Solver
 You can use this harvester for Supreme, Shopify, etc just replace the host and sitekey for the site you want to solve for
 
 This harvester removes expired captcha tokens automatically
