@@ -9,11 +9,15 @@ var expressApp, bankExpressApp, bankServer;
 
 var captchaBank = [];
 
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 app.on('ready', () => {
 	initCaptchaWindow();
 })
 
-function initCaptchaWindow() {
+async function initCaptchaWindow() {
 	captchaWindow = new BrowserWindow({
 		width: 480,
 		height: 680
@@ -22,6 +26,8 @@ function initCaptchaWindow() {
 	SetupIntercept();
 
 	captchaWindow.loadURL('https://accounts.google.com');
+	
+	await sleep(10000)
 
 	captchaWindow.webContents.toggleDevTools();
 	
