@@ -20,29 +20,30 @@ app.on('ready', () => {
 async function initCaptchaWindow() {
 	captchaWindow = new BrowserWindow({
 		width: 480,
-		height: 680
+		height: 680,
+			webPreferences: {
+				allowRunningInsecureContent: true
+			}
 	})
 
 	SetupIntercept();
 
 	captchaWindow.loadURL('https://accounts.google.com');
 	
-	await sleep(10000)
-
-	captchaWindow.webContents.toggleDevTools();
+	await sleep(1000)
 	
 	captchaWindow.on('close', function(e){
 		captchaWindow = null;
 	});
 
 	captchaWindow.webContents.session.webRequest.onBeforeRequest({urls: ['https://myaccount.google.com/*']}, (details, callback) => {
-		callback({redirectURL: 'http://checkout.shopify.com/'})
+		callback({redirectURL: 'http://supremenewyork.com/'})
 	})
 };
 
 function SetupIntercept() {
 	protocol.interceptBufferProtocol('http', (req, callback) => {
-		if(req.url == 'http://checkout.shopify.com/') {
+		if(req.url == 'http://supremenewyork.com/') {
 			fs.readFile(__dirname + '/captcha.html', 'utf8', function(err, html){
 				callback({mimeType: 'text/html', data: Buffer.from(html)});
 			});
@@ -85,8 +86,8 @@ electron.ipcMain.on('sendCaptcha', function(event, token) {
 	captchaBank.push({
 	  token: token,	
 	  timestamp: moment(),
-	  host: 'http://checkout.shopify.com/',
-	  sitekey: '6LeoeSkTAAAAAA9rkZs5oS82l69OEYjKRZAiKdaF'
+	  host: 'http://supremenewyork.com/',
+	  sitekey: '6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz'
 	})
 });
 
