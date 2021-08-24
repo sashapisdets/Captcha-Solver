@@ -8,6 +8,7 @@
     "start": "electron ."
   },
   "author": "ChubbyBalboa",
+  "contributors": ["MillenniumEarl"],
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.13",
