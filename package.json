@@ -2,8 +2,9 @@
   "name": "captcha-harvester",
   "version": "1.0.0",
   "description": "Working Captcha Harvester",
-  "main": "main.js",
+  "main": "build/main.js",
   "scripts": {
+    "build": "tsc --project ./",
     "start": "electron ."
   },
   "author": "ChubbyBalboa",
