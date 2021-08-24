@@ -70,16 +70,22 @@ async function initCaptchaWindow() {
 		width: 480,
 		height: 680,
 			webPreferences: {
-				allowRunningInsecureContent: true
+				nodeIntegration: false, // is default value after Electron v5
+				contextIsolation: true, // protect against prototype pollution
+				enableRemoteModule: false, // turn off remote
+				preload: path.join(__dirname, "preload.js") // use a preload script
 			}
 	});
+
+	// Start intercepting incoming requests
 	setupIntercept();
 
-	//captchaWindow.loadURL(TARGET_WEBSITE);
+	// Log in to Google account to prevent sapm on the target site (?)
 	captchaWindow.loadURL('https://accounts.google.com');
 	
 	await sleep(1000);
 
+	// When we are logged, redirect to target site
 	captchaWindow.webContents.session.webRequest.onBeforeRequest(
 		{urls: ['https://myaccount.google.com/*']}, 
 		(_details, callback) => callback({redirectURL: TARGET_WEBSITE}));
@@ -93,15 +99,15 @@ function setupIntercept() {
 		// Obtains the data from the request
 		const promises = data
 		.filter((part) => part.bytes || part.file)
-		.map(async (part) => part.bytes ?? await fs.readFile(part.file));
-
+		.map(async (part) => part.bytes ?? await fs.readFile(part.file as string));
+		
 		// Await for all the buffers to be read
 		const parts = await Promise.all(promises);
 
 		// Write buffers to request
 		parts.forEach((part) => request.write(part));
 	}
-	async function handler(req: electron.InterceptBufferProtocolRequest, callback: (buffer?: Buffer | undefined) => void) {
+	async function handler(req: electron.ProtocolRequest, callback: (buffer: Buffer) => void) {
 		if(req.url === TARGET_WEBSITE) {
 			// Load captcha
 			console.log("Loading CAPTCHA page");
@@ -115,13 +121,13 @@ function setupIntercept() {
 
 			request.on('response', res => {
 				const chunks: Buffer[] = [];
-	
+
 				res.on('data', chunk => chunks.push(Buffer.from(chunk)));
-				res.on('end', () => callback(Buffer.concat(chunks)));
+				res.on('end', async () => callback(Buffer.concat(chunks)));
 			})
-	
+
 			if (req.uploadData) await writeUploadData(req.uploadData, request);
-	
+
 			request.end();
 		}
 	}
@@ -178,6 +184,7 @@ app.on('window-all-closed', () => {
 electron.ipcMain.on('openCapWindow', () => initCaptchaWindow());
 
 electron.ipcMain.on('sendCaptcha', function(_: any, token: string) {
+	console.log("Adding token...");
 	captchaBank.push({
 	  token: token,
 	  timestamp: moment(),
