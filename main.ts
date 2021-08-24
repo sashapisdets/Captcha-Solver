@@ -28,6 +28,7 @@ interface ICaptchaData {
 const EXPIRE_TOKEN_VALUE = 120;
 const TARGET_WEBSITE = 'http://supremenewyork.com/';
 const TARGET_WEBSITE_KEY = '6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz';
+const INTERCEPT_PROTOCOL = 'http';
 
 // Global variables
 let captchaBank: ICaptchaData[] = [];
@@ -66,7 +67,7 @@ function removeExpiredTokens() {
 }
 
 async function initCaptchaWindow() {
-	let captchaWindow = new BrowserWindow({
+	const captchaWindow = new BrowserWindow({
 		width: 480,
 		height: 680,
 			webPreferences: {
@@ -91,6 +92,9 @@ async function initCaptchaWindow() {
 		(_details, callback) => callback({redirectURL: TARGET_WEBSITE}));
 };
 
+/**
+ * Intercept HTTP requests.
+ */
 function setupIntercept() {
 	/**
 	 * Write data in a request.
@@ -118,13 +122,13 @@ function setupIntercept() {
 		else {
 			console.log(`Receiving request from: ${req.url}`);
 			const request = net.request(req);
-
+			
 			request.on('response', res => {
 				const chunks: Buffer[] = [];
 
 				res.on('data', chunk => chunks.push(Buffer.from(chunk)));
-				res.on('end', async () => callback(Buffer.concat(chunks)));
-			})
+				res.on('end', () => callback(Buffer.concat(chunks)));
+			});
 
 			if (req.uploadData) await writeUploadData(req.uploadData, request);
 
@@ -132,7 +136,8 @@ function setupIntercept() {
 		}
 	}
 
-	protocol.interceptBufferProtocol('http', handler);
+	const active = protocol.interceptBufferProtocol(INTERCEPT_PROTOCOL, handler);
+	console.log(`Requests interceptor status: ${active ? 'enabled' : 'disabled'}`);
 };
 
 /**
