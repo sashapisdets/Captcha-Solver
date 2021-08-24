@@ -1,5 +1,5 @@
 import electron from 'electron';
-const { app, BrowserWindow, protocol, net } = electron;
+const { app, BrowserWindow, protocol, net, session } = electron;
 import { promises as fs } from 'fs';
 import moment from 'moment';
 import express from 'express';
@@ -168,14 +168,45 @@ function initBankServer(port:number = 8080) {
 	return bankExpressApp.listen(bankExpressApp.get('port'));
 }
 
+/**
+ * Delete all the cookies in this Electron session.
+ */
+async function deleteAllCookies() {
+	// Fetch all the cookies in this session
+  	const cookies = await session.defaultSession.cookies.get({});
+  
+  	cookies.forEach(async (cookie) => {
+		// Prepare the cookie URL
+    	let url = '';
+
+    	// Get prefix, like https://www.
+    	url += cookie.secure ? 'https://' : 'http://';
+    	url += cookie.domain?.startsWith('.') ? 'www' : '';
+
+    	// Append domain and path
+    	url += cookie.domain;
+    	url += cookie.path;
+
+		// Delete cookie
+		try {
+			await session.defaultSession.cookies.remove(url, cookie.name);
+		} catch (error) {
+			console.log(`Error removing cookie ${cookie.name}`, error);
+		}
+	});
+}
+
 //#endregion Methods
 
 //#region Electron IPC
 app.on('ready', () => initCaptchaWindow());
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
 	// Close the server
 	server.close();
+
+	// Delete all cookies
+	await deleteAllCookies();
 
 	// Close the app
   	app.quit();
