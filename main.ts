@@ -3,7 +3,6 @@ const { app, BrowserWindow, protocol, net } = electron;
 import fs from 'fs';
 import moment from 'moment';
 import express from 'express';
-import bodyParser from 'body-parser';
 
 interface ICaptchaData {
 	/**
@@ -97,8 +96,8 @@ function initBankServer(port:number = 8080) {
 
 	console.log(`Initializing bank server...`)
 	bankExpressApp.set('port', port.toString());
-	bankExpressApp.use(bodyParser.json());
-	bankExpressApp.use(bodyParser.urlencoded({ extended: true }));
+	bankExpressApp.use(express.json());
+	bankExpressApp.use(express.urlencoded({ extended: true }));
 	console.log(`Bank server listening on port: ${port}`);
 
 	bankExpressApp.get('/trigger', () => initCaptchaWindow());
