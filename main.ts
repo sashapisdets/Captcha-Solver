@@ -3,6 +3,7 @@ const { app, BrowserWindow, protocol, net } = electron;
 import fs from 'fs';
 import moment from 'moment';
 import express from 'express';
+import { readFileSync } from 'original-fs';
 
 interface ICaptchaData {
 	/**
@@ -53,7 +54,8 @@ function SetupIntercept() {
 	protocol.interceptBufferProtocol('http', (req, callback) => {
 		if(req.url == 'http://supremenewyork.com/') {
 			fs.readFile(__dirname + '/captcha.html', 'utf8', function(_err, html){
-				callback({mimeType: 'text/html', data: Buffer.from(html)});
+				//callback({mimeType: 'text/html', data: Buffer.from(html)});
+				callback(Buffer.from(html));
 			});
 		}else{
 			const request = net.request(req)
@@ -141,7 +143,5 @@ setInterval(function() {
 		}
 	}
 }, 1000);
-
-
   
 const server = initBankServer();
