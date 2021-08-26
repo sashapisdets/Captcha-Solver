@@ -81,7 +81,7 @@ async function initCaptchaWindow() {
 	// Start intercepting incoming requests
 	setupIntercept();
 
-	// Log in to Google account to prevent sapm on the target site (?)
+	// Log in to Google account to prevent spam on the target site (?)
 	captchaWindow.loadURL('https://accounts.google.com');
 	
 	await sleep(1000);
