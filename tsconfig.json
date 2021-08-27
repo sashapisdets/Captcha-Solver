@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "rootDir": "./",
+        "outDir": "./dist",
+        "esModuleInterop": true,
+        "strict": true,
+        "incremental": true,
+        "sourceMap": true,
+        "alwaysStrict": true,
+    }
+}
